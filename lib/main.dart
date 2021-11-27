@@ -1,26 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final helloWorldProvider = Provider((_) => 'Hello World');
+// A Counter example implemented with riverpod
 
 void main() {
   runApp(
-    ProviderScope(
-      child: MyApp(),
-    ),
+    // Adding ProviderScope enables Riverpod for the entire project
+    ProviderScope(child: MyApp()),
   );
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context, ScopedReader watch) {
-    final String value = watch(helloWorldProvider);
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: Text('Example')),
-        body: Center(
-          child: Text(value),
-        ),
+  Widget build(BuildContext context) {
+    return MaterialApp(home: Home());
+  }
+}
+
+/// Providers are declared globally and specifies how to create a state
+final counterProvider = StateNotifierProvider<Counter, int>((ref) => Counter());
+
+class Counter extends StateNotifier<int> {
+  Counter() : super(0);
+
+  void increment() => state++;
+  void decrement() => state--;
+}
+
+class Home extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context,  WidgetRef ref) {
+    final count = ref.watch(counterProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Counter example')),
+      body: Center(
+        // Consumer is a widget that allows you reading providers.
+        // You could also use the hook "ref.watch(" if you uses flutter_hooks
+
+        child: Text(count.toString()),
+      ),
+      floatingActionButton: FloatingActionButton(
+        // The read method is an utility to read a provider without listening to it
+        onPressed: () => ref.read(counterProvider.notifier).increment(),
+        child: const Icon(Icons.add),
       ),
     );
   }
